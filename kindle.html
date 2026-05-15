@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kindle Todo</title>
+  <style>
+    :root {
+      --bg: #f7f7f2;
+      --paper: #ffffff;
+      --text: #111;
+      --muted: #666;
+      --line: #222;
+      --soft: #e7e7df;
+      --done: #888;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 22px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 3px solid var(--line);
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 34px;
+      letter-spacing: -1px;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button, input, textarea, select {
+      font-family: inherit;
+      font-size: 18px;
+      border: 2px solid var(--line);
+      background: var(--paper);
+      color: var(--text);
+      border-radius: 12px;
+    }
+
+    button {
+      cursor: pointer;
+      padding: 12px 16px;
+      font-weight: bold;
+    }
+
+    button:active { transform: scale(0.98); }
+
+    input, select {
+      padding: 12px;
+      width: 100%;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      padding: 14px;
+      line-height: 1.45;
+      resize: vertical;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 390px 1fr;
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--paper);
+      border: 3px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .form-row {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .two {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 1fr 145px;
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .task-list {
+      display: grid;
+      gap: 10px;
+      max-height: 72vh;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .task {
+      border: 2px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fff;
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .task.active {
+      outline: 4px solid #111;
+    }
+
+    .check {
+      width: 34px;
+      height: 34px;
+      border: 3px solid var(--line);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      background: white;
+    }
+
+    .task.done .title {
+      text-decoration: line-through;
+      color: var(--done);
+    }
+
+    .title {
+      font-size: 21px;
+      font-weight: bold;
+      line-height: 1.2;
+      cursor: pointer;
+    }
+
+    .meta {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 15px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 3px 8px;
+      color: #111;
+      background: var(--soft);
+    }
+
+    .detail-empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 80px 20px;
+      font-size: 22px;
+    }
+
+    .detail-head {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .detail-title {
+      font-size: 30px;
+      font-weight: bold;
+      border: none;
+      border-bottom: 3px solid var(--line);
+      border-radius: 0;
+      padding-left: 0;
+    }
+
+    .section-title {
+      font-weight: bold;
+      font-size: 20px;
+      margin: 20px 0 8px;
+      border-bottom: 2px solid var(--line);
+      padding-bottom: 4px;
+    }
+
+    .mini-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .mini-item {
+      display: grid;
+      grid-template-columns: 38px 1fr 42px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .mini-item input {
+      font-size: 17px;
+      padding: 10px;
+    }
+
+    .mini-check {
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--line);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      cursor: pointer;
+      background: white;
+    }
+
+    .danger {
+      border-color: #111;
+      background: #f1f1ec;
+    }
+
+    .small {
+      font-size: 15px;
+      padding: 9px 11px;
+    }
+
+    .footer-note {
+      margin-top: 14px;
+      font-size: 14px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (max-width: 850px) {
+      .layout { grid-template-columns: 1fr; }
+      .task-list { max-height: none; }
+      header { align-items: flex-start; flex-direction: column; }
+      .top-actions { justify-content: flex-start; }
+    }
+
+    @media (max-width: 520px) {
+      .app { padding: 12px; }
+      h1 { font-size: 28px; }
+      .two, .filters { grid-template-columns: 1fr; }
+      button, input, textarea, select { font-size: 17px; }
+      .panel { padding: 12px; }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body:not(.kindle) {
+        --bg: #111;
+        --paper: #1b1b1b;
+        --text: #f4f4f4;
+        --muted: #aaa;
+        --line: #eee;
+        --soft: #2b2b2b;
+      }
+    }
+
+    body.kindle {
+      --bg: #f8f8f0;
+      --paper: #fff;
+      --text: #000;
+      --muted: #444;
+      --line: #000;
+      --soft: #eee;
+      font-size: 20px;
+    }
+
+    body.kindle button,
+    body.kindle input,
+    body.kindle textarea,
+    body.kindle select {
+      font-size: 22px;
+      border-radius: 4px;
+    }
+
+    body.kindle .task {
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>Kindle Todo</h1>
+        <div class="footer-note">Organize no PC. Execute no Kindle.</div>
+      </div>
+      <div class="top-actions">
+        <button onclick="toggleKindleMode()">Modo Kindle</button>
+        <button onclick="exportData()">Exportar</button>
+        <button onclick="importData()">Importar</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="panel">
+        <div class="form-row">
+          <input id="newTitle" placeholder="Nova tarefa..." onkeydown="enterAdd(event)" />
+        </div>
+        <div class="form-row two">
+          <select id="newProject">
+            <option>Geral</option>
+            <option>Loja</option>
+            <option>Financeiro</option>
+            <option>Marketing</option>
+            <option>Pessoal</option>
+          </select>
+          <select id="newPriority">
+            <option>Normal</option>
+            <option>Alta</option>
+            <option>Baixa</option>
+          </select>
+        </div>
+        <button style="width:100%" onclick="addTask()">+ Adicionar</button>
+
+        <div class="filters">
+          <input id="search" placeholder="Buscar..." oninput="render()" />
+          <select id="filter" onchange="render()">
+            <option value="all">Todas</option>
+            <option value="open">Abertas</option>
+            <option value="done">Concluídas</option>
+          </select>
+        </div>
+
+        <div id="taskList" class="task-list"></div>
+      </aside>
+
+      <main class="panel" id="detail"></main>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'kindle_todo_v2';
+    let tasks = loadTasks();
+    let selectedId = tasks[0]?.id || null;
+
+    function uid() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    }
+
+    function loadTasks() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) return JSON.parse(saved);
+      } catch (e) {}
+
+      return [
+        {
+          id: uid(),
+          title: 'Exemplo: organizar tarefas da loja',
+          project: 'Loja',
+          priority: 'Alta',
+          done: false,
+          notes: 'Aqui dentro fica a área interna da tarefa. Você pode escrever detalhes, ideias, lembretes, links e observações.',
+          checklist: [
+            { id: uid(), text: 'Criar tarefa no PC', done: true },
+            { id: uid(), text: 'Abrir no Kindle', done: false },
+            { id: uid(), text: 'Marcar o checkbox quando terminar', done: false }
+          ]
+        }
+      ];
+    }
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    }
+
+    function enterAdd(event) {
+      if (event.key === 'Enter') addTask();
+    }
+
+    function addTask() {
+      const titleEl = document.getElementById('newTitle');
+      const title = titleEl.value.trim();
+      if (!title) return;
+
+      const task = {
+        id: uid(),
+        title,
+        project: document.getElementById('newProject').value,
+        priority: document.getElementById('newPriority').value,
+        done: false,
+        notes: '',
+        checklist: []
+      };
+
+      tasks.unshift(task);
+      selectedId = task.id;
+      titleEl.value = '';
+      save();
+      render();
+    }
+
+    function selectTask(id) {
+      selectedId = id;
+      render();
+    }
+
+    function toggleDone(id) {
+      const t = tasks.find(x => x.id === id);
+      if (!t) return;
+      t.done = !t.done;
+      save();
+      render();
+    }
+
+    function updateTask(id, field, value) {
+      const t = tasks.find(x => x.id === id);
+      if (!t) return;
+      t[field] = value;
+      save();
+      renderListOnly();
+    }
+
+    function deleteTask(id) {
+      if (!confirm('Apagar esta tarefa?')) return;
+      tasks = tasks.filter(t => t.id !== id);
+      selectedId = tasks[0]?.id || null;
+      save();
+      render();
+    }
+
+    function addChecklist(id) {
+      const t = tasks.find(x => x.id === id);
+      if (!t) return;
+      t.checklist.push({ id: uid(), text: '', done: false });
+      save();
+      render();
+    }
+
+    function updateChecklist(taskId, itemId, field, value) {
+      const t = tasks.find(x => x.id === taskId);
+      if (!t) return;
+      const item = t.checklist.find(i => i.id === itemId);
+      if (!item) return;
+      item[field] = value;
+      save();
+    }
+
+    function removeChecklist(taskId, itemId) {
+      const t = tasks.find(x => x.id === taskId);
+      if (!t) return;
+      t.checklist = t.checklist.filter(i => i.id !== itemId);
+      save();
+      render();
+    }
+
+    function toggleChecklist(taskId, itemId) {
+      const t = tasks.find(x => x.id === taskId);
+      if (!t) return;
+      const item = t.checklist.find(i => i.id === itemId);
+      if (!item) return;
+      item.done = !item.done;
+      save();
+      render();
+    }
+
+    function getFilteredTasks() {
+      const q = document.getElementById('search')?.value.toLowerCase() || '';
+      const filter = document.getElementById('filter')?.value || 'all';
+
+      return tasks.filter(t => {
+        const matchesText = (t.title + ' ' + t.project + ' ' + t.priority + ' ' + t.notes).toLowerCase().includes(q);
+        const matchesFilter = filter === 'all' || (filter === 'open' && !t.done) || (filter === 'done' && t.done);
+        return matchesText && matchesFilter;
+      });
+    }
+
+    function renderListOnly() {
+      const list = document.getElementById('taskList');
+      const visible = getFilteredTasks();
+      list.innerHTML = visible.map(t => `
+        <div class="task ${t.done ? 'done' : ''} ${t.id === selectedId ? 'active' : ''}">
+          <div class="check" onclick="toggleDone('${t.id}')">${t.done ? '✓' : ''}</div>
+          <div>
+            <div class="title" onclick="selectTask('${t.id}')">${escapeHtml(t.title)}</div>
+            <div class="meta">
+              <span class="badge">${escapeHtml(t.project)}</span>
+              <span class="badge">${escapeHtml(t.priority)}</span>
+              <span>${t.checklist.filter(i => i.done).length}/${t.checklist.length}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderDetail() {
+      const detail = document.getElementById('detail');
+      const t = tasks.find(x => x.id === selectedId);
+
+      if (!t) {
+        detail.innerHTML = '<div class="detail-empty">Selecione uma tarefa ou crie uma nova.</div>';
+        return;
+      }
+
+      detail.innerHTML = `
+        <div class="detail-head">
+          <button onclick="toggleDone('${t.id}')">${t.done ? '✓ Feita' : 'Marcar feita'}</button>
+          <button class="danger" onclick="deleteTask('${t.id}')">Apagar</button>
+        </div>
+
+        <input class="detail-title" value="${escapeAttr(t.title)}" oninput="updateTask('${t.id}', 'title', this.value)" />
+
+        <div class="form-row two" style="margin-top:14px">
+          <select onchange="updateTask('${t.id}', 'project', this.value)">
+            ${option('Geral', t.project)}
+            ${option('Loja', t.project)}
+            ${option('Financeiro', t.project)}
+            ${option('Marketing', t.project)}
+            ${option('Pessoal', t.project)}
+          </select>
+          <select onchange="updateTask('${t.id}', 'priority', this.value)">
+            ${option('Normal', t.priority)}
+            ${option('Alta', t.priority)}
+            ${option('Baixa', t.priority)}
+          </select>
+        </div>
+
+        <div class="section-title">Anotações internas</div>
+        <textarea placeholder="Escreva tudo sobre esta tarefa..." oninput="updateTask('${t.id}', 'notes', this.value)">${escapeHtml(t.notes || '')}</textarea>
+
+        <div class="section-title">Checklist interno</div>
+        <div class="mini-list">
+          ${t.checklist.map(i => `
+            <div class="mini-item">
+              <div class="mini-check" onclick="toggleChecklist('${t.id}', '${i.id}')">${i.done ? '✓' : ''}</div>
+              <input value="${escapeAttr(i.text)}" placeholder="Subtarefa..." oninput="updateChecklist('${t.id}', '${i.id}', 'text', this.value)" />
+              <button class="small" onclick="removeChecklist('${t.id}', '${i.id}')">×</button>
+            </div>
+          `).join('')}
+        </div>
+        <button style="margin-top:10px" onclick="addChecklist('${t.id}')">+ Item do checklist</button>
+      `;
+    }
+
+    function render() {
+      renderListOnly();
+      renderDetail();
+    }
+
+    function option(value, current) {
+      return `<option ${value === current ? 'selected' : ''}>${value}</option>`;
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function escapeAttr(str) {
+      return escapeHtml(str).replace(/`/g, '&#096;');
+    }
+
+    function toggleKindleMode() {
+      document.body.classList.toggle('kindle');
+      localStorage.setItem('kindle_mode', document.body.classList.contains('kindle') ? '1' : '0');
+    }
+
+    function exportData() {
+      const data = JSON.stringify(tasks, null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'kindle-todo-backup.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importData() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json,application/json';
+      input.onchange = () => {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const imported = JSON.parse(reader.result);
+            if (!Array.isArray(imported)) throw new Error('Formato inválido');
+            tasks = imported;
+            selectedId = tasks[0]?.id || null;
+            save();
+            render();
+          } catch (e) {
+            alert('Arquivo inválido.');
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+
+    if (localStorage.getItem('kindle_mode') === '1') {
+      document.body.classList.add('kindle');
+    }
+
+    render();
+  </script>
+</body>
+</html>
