@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kindle Todo</title>
+<style>
+  body{margin:0;background:#f7f7ef;color:#000;font-family:Georgia,'Times New Roman',serif;font-size:20px;}
+  .app{max-width:760px;margin:auto;padding:12px;}
+  h1{font-size:31px;margin:4px 0 8px;text-align:center;border-bottom:3px solid #000;padding-bottom:8px;}
+  button,input,select,textarea{font-family:Georgia,'Times New Roman',serif;font-size:20px;border:2px solid #000;background:#fff;color:#000;border-radius:4px;box-sizing:border-box;padding:12px;}
+  button{font-weight:bold;cursor:pointer;}
+  input,select,textarea{width:100%;}
+  textarea{min-height:170px;line-height:1.4;}
+  .top{display:table;width:100%;margin-bottom:10px;}
+  .top div{display:table-cell;padding:3px;}
+  .top button{width:100%;font-size:17px;padding:10px 4px;}
+  .box{border:3px solid #000;background:#fff;padding:10px;margin-bottom:12px;}
+  .hidden{display:none;}
+  .row{margin-bottom:9px;}
+  .page-title{text-align:center;font-size:25px;font-weight:bold;border:3px solid #000;background:#fff;padding:10px;margin-bottom:10px;}
+  .pager{display:table;width:100%;margin-bottom:10px;}
+  .pager div{display:table-cell;padding:3px;vertical-align:middle;}
+  .pager button{width:100%;font-size:22px;padding:14px 4px;}
+  .counter{text-align:center;font-size:15px;color:#333;margin-bottom:8px;}
+  .section-title{font-size:22px;font-weight:bold;margin:14px 0 7px;border-bottom:2px solid #000;padding-bottom:3px;}
+  .task{border:2px solid #000;background:#fff;margin:8px 0;padding:10px;display:table;width:100%;box-sizing:border-box;}
+  .task.done{display:none;}
+  .ck{display:table-cell;width:44px;vertical-align:top;}
+  .check{width:34px;height:34px;border:3px solid #000;text-align:center;line-height:30px;font-size:24px;font-weight:bold;background:#fff;}
+  .body{display:table-cell;vertical-align:top;padding-left:8px;}
+  .title{font-size:22px;font-weight:bold;line-height:1.2;}
+  .meta{font-size:15px;margin-top:5px;color:#333;}
+  .badge{border:1px solid #000;background:#eee;padding:2px 6px;margin-right:4px;}
+  .empty{text-align:center;color:#444;padding:30px 8px;}
+  .detail-title{font-size:28px;font-weight:bold;border:0;border-bottom:3px solid #000;border-radius:0;padding-left:0;margin-bottom:10px;}
+  .mini{display:table;width:100%;margin:7px 0;}
+  .mini-c,.mini-x{display:table-cell;width:42px;vertical-align:middle;}
+  .mini-i{display:table-cell;padding:0 5px;}
+  .mini-x button{padding:8px 10px;}
+  .danger{background:#eee;}
+  .fade{opacity:.35;}
+  .hint{text-align:center;font-size:15px;color:#444;margin:5px 0 10px;}
+  @media (orientation:landscape){.app{max-width:1040px}.wide{display:grid;grid-template-columns:1fr 1fr;gap:12px}.wide .box{margin-bottom:0}}
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>Kindle Todo</h1>
+
+  <div class="top">
+    <div><button onclick="showAdd()">+ Nova</button></div>
+    <div><button onclick="showList()">Lista</button></div>
+    <div><button onclick="exportData()">Backup</button></div>
+  </div>
+
+  <div id="addBox" class="box hidden">
+    <div class="section-title">Nova tarefa</div>
+    <div class="row"><input id="newTitle" placeholder="Nome da tarefa..." onkeydown="enterAdd(event)"></div>
+    <div class="row"><select id="newProject"><option>Geral</option><option>Loja</option><option>Financeiro</option><option>Marketing</option><option>Pessoal</option></select></div>
+    <div class="row"><select id="newPriority"><option value="alta">Prioridade Alta</option><option value="normal" selected>Prioridade Normal</option><option value="baixa">Prioridade Baixa</option></select></div>
+    <button style="width:100%" onclick="addTask()">Adicionar tarefa</button>
+  </div>
+
+  <div id="listPage">
+    <div class="pager">
+      <div style="width:24%"><button onclick="prevPage()">◀</button></div>
+      <div><div id="pageTitle" class="page-title">Normal</div></div>
+      <div style="width:24%"><button onclick="nextPage()">▶</button></div>
+    </div>
+    <div class="counter" id="counter"></div>
+    <div class="hint">Use ◀ ▶ para andar entre Alta, Normal e Baixa.</div>
+    <div class="row"><input id="search" placeholder="Buscar nesta lista..." oninput="renderList()"></div>
+    <div id="list"></div>
+  </div>
+
+  <div id="detailPage" class="hidden"></div>
+</div>
+
+<script>
+var KEY='kindle_todo_carrossel_v1';
+var pages=['alta','normal','baixa'];
+var pageIndex=1;
+var tasks=load();
+var selected=null;
+
+function uid(){return String(new Date().getTime())+String(Math.floor(Math.random()*99999));}
+function load(){try{var s=localStorage.getItem(KEY);if(s)return JSON.parse(s);}catch(e){}return[
+{id:uid(),title:'Conferir pagamentos do dia',project:'Financeiro',priority:'alta',done:false,notes:'',checklist:[{id:uid(),text:'Abrir WhatsApp',done:false},{id:uid(),text:'Marcar recebidos',done:false}]},
+{id:uid(),title:'Separar tarefas da loja',project:'Loja',priority:'normal',done:false,notes:'',checklist:[]},
+{id:uid(),title:'Ideias para depois',project:'Pessoal',priority:'baixa',done:false,notes:'',checklist:[]}
+];}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(tasks));}catch(e){}}
+function showAdd(){var b=document.getElementById('addBox');b.className=b.className.indexOf('hidden')>-1?'box':'box hidden';if(b.className==='box')setTimeout(function(){b.scrollIntoView();},60);}
+function showList(){selected=null;document.getElementById('detailPage').className='hidden';document.getElementById('listPage').className='';renderList();setTimeout(function(){document.getElementById('listPage').scrollIntoView();},50);}
+function enterAdd(e){if(e.key==='Enter')addTask();}
+function addTask(){var el=document.getElementById('newTitle');var title=el.value.replace(/^\s+|\s+$/g,'');if(!title)return;var p=document.getElementById('newPriority').value;tasks.unshift({id:uid(),title:title,project:document.getElementById('newProject').value,priority:p,done:false,notes:'',checklist:[]});el.value='';document.getElementById('addBox').className='box hidden';save();pageIndex=pages.indexOf(p);renderList();}
+function prevPage(){pageIndex--;if(pageIndex<0)pageIndex=pages.length-1;renderList();}
+function nextPage(){pageIndex++;if(pageIndex>=pages.length)pageIndex=0;renderList();}
+function priorityName(p){if(p==='alta')return 'Prioridade Alta';if(p==='normal')return 'Prioridade Normal';return 'Prioridade Baixa';}
+function renderHeader(){var p=pages[pageIndex];document.getElementById('pageTitle').innerHTML=priorityName(p);var total=0;for(var i=0;i<tasks.length;i++)if(!tasks[i].done&&tasks[i].priority===p)total++;document.getElementById('counter').innerHTML=(pageIndex+1)+' de '+pages.length+' • '+total+' tarefas abertas';}
+function renderList(){renderHeader();var p=pages[pageIndex];var q=(document.getElementById('search')?document.getElementById('search').value:'').toLowerCase();var html='';for(var i=0;i<tasks.length;i++){var t=tasks[i];if(t.done)continue;if(t.priority!==p)continue;var text=(t.title+' '+t.project+' '+t.notes).toLowerCase();if(q&&text.indexOf(q)===-1)continue;html+=taskHtml(t);}document.getElementById('list').innerHTML=html||'<div class="empty">Nenhuma tarefa nesta prioridade.</div>';}
+function taskHtml(t){var done=0;for(var i=0;i<t.checklist.length;i++)if(t.checklist[i].done)done++;return '<div class="task" id="task-'+t.id+'"><div class="ck"><div class="check" onclick="finishTask(\''+t.id+'\')"></div></div><div class="body" onclick="openTask(\''+t.id+'\')"><div class="title">'+esc(t.title)+'</div><div class="meta"><span class="badge">'+esc(t.project)+'</span><span class="badge">'+priorityName(t.priority).replace('Prioridade ','')+'</span>'+done+'/'+t.checklist.length+'</div></div></div>';}
+function finishTask(id){var el=document.getElementById('task-'+id);if(el)el.className='task fade';setTimeout(function(){for(var i=0;i<tasks.length;i++){if(tasks[i].id===id){tasks[i].done=true;break;}}save();renderList();},250);}
+function get(id){for(var i=0;i<tasks.length;i++)if(tasks[i].id===id)return tasks[i];return null;}
+function openTask(id){selected=id;var t=get(id);if(!t)return;document.getElementById('listPage').className='hidden';document.getElementById('detailPage').className='';renderDetail();setTimeout(function(){document.getElementById('detailPage').scrollIntoView();},50);}
+function renderDetail(){var t=get(selected);if(!t){showList();return;}var h='<div class="box"><button onclick="showList()" style="width:49%">← Voltar</button> <button onclick="finishFromDetail(\''+t.id+'\')" style="width:49%">Concluir</button><div class="section-title">Tarefa</div><input class="detail-title" value="'+attr(t.title)+'" oninput="upd(\'title\',this.value)"><div class="row"><select onchange="upd(\'project\',this.value)">'+opt('Geral',t.project)+opt('Loja',t.project)+opt('Financeiro',t.project)+opt('Marketing',t.project)+opt('Pessoal',t.project)+'</select></div><div class="row"><select onchange="updPriority(this.value)">'+optP('alta',t.priority,'Prioridade Alta')+optP('normal',t.priority,'Prioridade Normal')+optP('baixa',t.priority,'Prioridade Baixa')+'</select></div><div class="section-title">Anotações internas</div><textarea oninput="upd(\'notes\',this.value)" placeholder="Detalhes da tarefa...">'+esc(t.notes)+'</textarea><div class="section-title">Checklist interno</div>';
+for(var i=0;i<t.checklist.length;i++){var it=t.checklist[i];h+='<div class="mini"><div class="mini-c"><div class="check" onclick="toggleItem(\''+it.id+'\')">'+(it.done?'✓':'')+'</div></div><div class="mini-i"><input value="'+attr(it.text)+'" oninput="updateItem(\''+it.id+'\',this.value)"></div><div class="mini-x"><button onclick="delItem(\''+it.id+'\')">×</button></div></div>';}
+h+='<button onclick="addItem()" style="width:100%;margin-top:8px">+ Item</button><button class="danger" onclick="deleteTask()" style="width:100%;margin-top:10px">Apagar tarefa</button></div>';document.getElementById('detailPage').innerHTML=h;}
+function upd(field,val){var t=get(selected);if(!t)return;t[field]=val;save();}
+function updPriority(val){var t=get(selected);if(!t)return;t.priority=val;pageIndex=pages.indexOf(val);save();}
+function finishFromDetail(id){for(var i=0;i<tasks.length;i++)if(tasks[i].id===id)tasks[i].done=true;save();showList();}
+function addItem(){var t=get(selected);if(!t)return;t.checklist.push({id:uid(),text:'',done:false});save();renderDetail();}
+function toggleItem(iid){var t=get(selected);for(var i=0;i<t.checklist.length;i++)if(t.checklist[i].id===iid)t.checklist[i].done=!t.checklist[i].done;save();renderDetail();}
+function updateItem(iid,val){var t=get(selected);for(var i=0;i<t.checklist.length;i++)if(t.checklist[i].id===iid)t.checklist[i].text=val;save();}
+function delItem(iid){var t=get(selected);var n=[];for(var i=0;i<t.checklist.length;i++)if(t.checklist[i].id!==iid)n.push(t.checklist[i]);t.checklist=n;save();renderDetail();}
+function deleteTask(){if(!confirm('Apagar?'))return;var n=[];for(var i=0;i<tasks.length;i++)if(tasks[i].id!==selected)n.push(tasks[i]);tasks=n;save();showList();}
+function exportData(){prompt('Copie este backup:',JSON.stringify(tasks));}
+function opt(v,c){return '<option '+(v===c?'selected':'')+'>'+v+'</option>';}
+function optP(v,c,label){return '<option value="'+v+'" '+(v===c?'selected':'')+'>'+label+'</option>';}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
+function attr(s){return esc(s).replace(/`/g,'&#096;');}
+renderList();
+</script>
+</body>
+</html>
