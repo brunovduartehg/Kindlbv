@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kindle Todo Online</title>
+<style>
+  body{margin:0;background:#f7f7ef;color:#000;font-family:Georgia,'Times New Roman',serif;font-size:20px;}
+  .app{max-width:760px;margin:auto;padding:12px;}
+  h1{font-size:30px;margin:4px 0 6px;text-align:center;border-bottom:3px solid #000;padding-bottom:8px;}
+  button,input,select,textarea{font-family:Georgia,'Times New Roman',serif;font-size:20px;border:2px solid #000;background:#fff;color:#000;border-radius:4px;box-sizing:border-box;padding:12px;}
+  button{font-weight:bold;cursor:pointer;}
+  input,select,textarea{width:100%;}
+  textarea{min-height:170px;line-height:1.4;}
+  .top{display:table;width:100%;margin-bottom:8px;}
+  .top div{display:table-cell;padding:3px;}
+  .top button{width:100%;font-size:16px;padding:10px 3px;}
+  .box{border:3px solid #000;background:#fff;padding:10px;margin-bottom:12px;}
+  .hidden{display:none;}
+  .row{margin-bottom:9px;}
+  .status{text-align:center;font-size:14px;color:#333;margin:4px 0 10px;min-height:18px;}
+  .page-title{text-align:center;font-size:24px;font-weight:bold;border:3px solid #000;background:#fff;padding:10px;margin-bottom:10px;}
+  .pager{display:table;width:100%;margin-bottom:8px;}
+  .pager div{display:table-cell;padding:3px;vertical-align:middle;}
+  .pager button{width:100%;font-size:22px;padding:14px 4px;}
+  .counter{text-align:center;font-size:15px;color:#333;margin-bottom:8px;}
+  .hint{text-align:center;font-size:14px;color:#444;margin:5px 0 10px;}
+  .section-title{font-size:22px;font-weight:bold;margin:14px 0 7px;border-bottom:2px solid #000;padding-bottom:3px;}
+  .task{border:2px solid #000;background:#fff;margin:8px 0;padding:10px;display:table;width:100%;box-sizing:border-box;}
+  .ck{display:table-cell;width:44px;vertical-align:top;}
+  .check{width:34px;height:34px;border:3px solid #000;text-align:center;line-height:30px;font-size:24px;font-weight:bold;background:#fff;}
+  .body{display:table-cell;vertical-align:top;padding-left:8px;}
+  .title{font-size:22px;font-weight:bold;line-height:1.2;}
+  .meta{font-size:15px;margin-top:5px;color:#333;}
+  .badge{border:1px solid #000;background:#eee;padding:2px 6px;margin-right:4px;}
+  .empty{text-align:center;color:#444;padding:30px 8px;}
+  .detail-title{font-size:28px;font-weight:bold;border:0;border-bottom:3px solid #000;border-radius:0;padding-left:0;margin-bottom:10px;}
+  .mini{display:table;width:100%;margin:7px 0;}
+  .mini-c,.mini-x{display:table-cell;width:42px;vertical-align:middle;}
+  .mini-i{display:table-cell;padding:0 5px;}
+  .mini-x button{padding:8px 10px;}
+  .danger{background:#eee;}
+  .fade{opacity:.35;}
+
+  .progress-compact{text-align:center;font-size:17px;padding:10px;margin-top:8px;}
+  .progress-title{font-weight:bold;font-size:23px;margin-bottom:8px;}
+  .progress-main{display:table;width:100%;font-size:18px;margin:4px 0 6px;}
+  .progress-main span{display:table-cell;text-align:center;white-space:nowrap;}
+  .progress-bar{font-size:32px;letter-spacing:1px;line-height:1.15;margin:8px 0;font-family:Georgia,'Times New Roman',serif;font-weight:bold;}
+  .progress-resume{font-size:15px;color:#222;margin-top:6px;line-height:1.35;}
+
+  .robot-reason{font-size:14px;color:#333;margin-top:4px;line-height:1.25;}
+
+
+  .progressBox{border:3px solid #000;background:#fff;padding:10px;margin:10px 0;text-align:center;}
+  .bigNum{font-size:28px;font-weight:bold;}
+  .bar{font-family:monospace;font-size:24px;letter-spacing:1px;margin:8px 0;}
+  .robotCard{border:3px solid #000;background:#fff;margin:10px 0;padding:10px;}
+  .robotScore{font-size:14px;color:#333;margin-top:4px;}
+  .smallBtn{font-size:16px;padding:8px;}
+
+  /* ===== TELA DE CARREGAMENTO INICIAL ===== */
+  .boot-overlay{position:fixed;left:0;top:0;right:0;bottom:0;background:#f7f7ef;z-index:200;display:block;padding:24px;box-sizing:border-box;text-align:center;transition:opacity .4s;}
+  .boot-box{border:3px solid #000;background:#fff;max-width:520px;margin:70px auto 0;padding:18px;}
+  .boot-title{font-size:28px;font-weight:bold;margin-bottom:10px;}
+  .boot-text{font-size:17px;margin:8px 0;}
+  .boot-bar{font-size:28px;letter-spacing:1px;margin:12px 0;font-weight:bold;}
+  .boot-small{font-size:13px;color:#444;}
+
+
+  /* ===== DESCRIÇÃO RICA ESTILO ASANA ===== */
+  .rich-desc-wrap{margin:8px 0 12px;}
+  .rich-toolbar{display:table;width:100%;margin:4px 0 6px;}
+  .rich-toolbar div{display:table-cell;padding:2px;}
+  .rich-toolbar button,.rich-toolbar label{display:block;width:100%;font-size:14px;padding:7px;border:2px solid #000;background:#fff;font-weight:bold;text-align:center;box-sizing:border-box;border-radius:4px;}
+  .rich-editor{border:2px solid #000;background:#fff;min-height:190px;padding:10px;font-size:18px;line-height:1.4;outline:none;white-space:pre-wrap;}
+  .rich-editor:empty:before{content:attr(data-placeholder);color:#777;}
+  .rich-editor img{max-width:100%;max-height:360px;border:1px solid #999;margin:8px 0;display:block;background:#fff;}
+  .rich-editor a{color:#000;text-decoration:underline;}
+
+.file-attach{margin:6px 0;padding:6px;border:1px solid #999;background:#f7f7f7;}
+.file-link{display:block;font-weight:bold;text-decoration:underline;color:#0645ad;word-break:break-all;cursor:pointer;}
+.file-link:hover{text-decoration:underline;}
+
+.drive-file-box{
+  border:2px solid #0645ad;
+  background:#f8fbff;
+  padding:8px;
+  margin:8px 0;
+}
+.drive-file-button{
+  display:block;
+  width:100%;
+  border:2px solid #0645ad;
+  background:#fff;
+  color:#0645ad;
+  font-weight:bold;
+  text-decoration:underline;
+  padding:10px;
+  box-sizing:border-box;
+  text-align:left;
+  font-size:16px;
+  cursor:pointer;
+}
+.drive-file-url{
+  font-size:11px;
+  color:#555;
+  margin-top:5px;
+  word-break:break-all;
+}
+
+
+.file-url{
+  font-size:11px;
+  color:#555;
+  margin-top:4px;
+  word-break:break-all;
+}
+
+
+  .rich-hint{font-size:13px;color:#444;text-align:center;margin-top:5px;}
+  .image-viewer{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:120;display:none;padding:18px;box-sizing:border-box;}
+  .image-viewer-box{background:#fff;border:3px solid #000;max-width:760px;margin:20px auto;padding:10px;text-align:center;}
+  .image-viewer img{max-width:100%;max-height:72vh;}
+  .image-viewer button{margin-top:8px;width:100%;}
+  @media screen and (max-width:800px){
+    .rich-editor{min-height:150px;font-size:17px;}
+    .rich-editor img{max-height:220px;}
+    .rich-toolbar button,.rich-toolbar label{font-size:13px;padding:6px;}
+  }
+
+
+  /* ===== DETALHE COMPACTO PRAZO / RECORRÊNCIA ===== */
+  .compact-panel{border:2px solid #000;background:#fafafa;padding:8px;margin:8px 0 12px;}
+  .compact-title{font-size:17px;font-weight:bold;margin-bottom:6px;}
+  .compact-grid{display:table;width:100%;}
+  .compact-cell{display:table-cell;padding:3px;vertical-align:middle;}
+  .compact-cell.small{width:26%;}
+  .compact-cell.medium{width:32%;}
+  .compact-cell select,.compact-cell input{font-size:15px;padding:7px;border:1px solid #000;}
+  .compact-label{font-size:12px;color:#333;margin-bottom:2px;}
+  .compact-actions{display:table;width:100%;margin-top:6px;}
+  .compact-actions div{display:table-cell;padding:3px;}
+  .compact-actions button{font-size:14px;padding:7px;width:100%;}
+  .compact-hint{font-size:12px;color:#444;text-align:center;margin-top:4px;}
+  @media screen and (max-width:800px){
+    .compact-cell{display:block;width:auto!important;}
+    .compact-actions div{display:table-cell;}
+  }
+
+
+  /* ===== PAINEL FOCO / KINDLE ===== */
+  .progress-layout{display:table;width:100%;}
+  .progress-left{display:table-cell;width:72%;vertical-align:middle;padding-right:10px;}
+  .week-summary{display:table-cell;width:28%;vertical-align:middle;border-left:2px solid #aaa;padding-left:12px;text-align:left;}
+  .week-title{font-size:18px;font-weight:bold;margin-bottom:8px;text-align:left;}
+  .week-line{font-size:15px;margin:6px 0;}
+  .week-link{font-size:14px;font-weight:bold;margin-top:8px;text-align:left;}
+
+  .attention-box{border:3px solid #d9b46a;background:#fff9ef;padding:10px;margin-bottom:12px;}
+  .attention-top{display:table;width:100%;font-size:20px;font-weight:bold;margin-bottom:8px;}
+  .attention-top div{display:table-cell;}
+  .attention-top .right{text-align:right;font-size:16px;font-weight:bold;cursor:pointer;}
+  .attention-grid{display:table;width:100%;}
+  .attention-card{display:table-cell;width:33.33%;padding:6px 10px;border-right:1px solid #d9b46a;vertical-align:top;cursor:pointer;}
+  .attention-card:last-child{border-right:0;}
+  .attention-title{font-weight:bold;font-size:18px;margin-bottom:4px;}
+  .attention-date{font-weight:bold;margin-top:5px;}
+  .attention-red{color:#d33;}
+  .attention-orange{color:#ff8800;}
+  .attention-green{color:#0b8f45;}
+
+  .focus-tabs{display:table;width:100%;margin:8px 0 8px;}
+  .focus-tabs div{display:table-cell;padding:3px;}
+  .focus-tabs button{width:100%;font-size:16px;padding:10px 4px;border-color:#999;}
+  .focus-tabs .active-focus{background:#000;color:#fff;border-color:#000;}
+  .focus-tabs .late-focus{border:3px solid #000;background:#fff;}
+
+  .pager-focus{display:table;width:100%;margin-bottom:8px;}
+  .pager-focus div{display:table-cell;padding:3px;vertical-align:middle;}
+  .pager-focus button{width:100%;font-size:24px;padding:14px 4px;}
+  .pager-focus .middle{width:56%;}
+  .pager-focus .side{width:22%;}
+  .page-title-focus{text-align:center;font-size:26px;font-weight:bold;border:3px solid #000;background:#fff;padding:12px;margin-bottom:0;}
+  .focus-counter{text-align:center;font-size:15px;color:#333;margin:4px 0 8px;}
+
+  .task-icon{display:table-cell;width:42px;vertical-align:middle;text-align:center;font-size:28px;padding-right:8px;}
+  .task-extra{display:table-cell;width:155px;vertical-align:middle;text-align:right;font-size:14px;color:#333;}
+  .due-line{font-size:14px;margin-top:5px;color:#333;}
+  .late-text{font-weight:bold;color:#d33;}
+  .legend{font-size:14px;text-align:center;margin:10px 0;color:#333;}
+  .legend span{margin:0 8px;white-space:nowrap;}
+
+  .popup-overlay{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:99;display:none;}
+  .popup-box{background:#fff;border:3px solid #000;max-width:560px;margin:70px auto 0;padding:16px;text-align:center;}
+  .popup-title{font-size:28px;font-weight:bold;margin:8px 0;}
+  .popup-item{border:2px solid #ddd;text-align:left;padding:8px;margin:8px 0;font-size:16px;}
+  .popup-actions{display:table;width:100%;margin-top:12px;}
+  .popup-actions div{display:table-cell;padding:4px;}
+  .popup-actions button{width:100%;}
+
+  @media screen and (max-width:800px){
+    .progress-left,.week-summary{display:block;width:auto;border-left:0;padding-left:0;padding-right:0;}
+    .week-summary{border-top:1px solid #aaa;margin-top:8px;padding-top:8px;text-align:center;}
+    .week-title,.week-link{text-align:center;}
+    .attention-card{display:block;width:auto;border-right:0;border-bottom:1px solid #d9b46a;}
+    .attention-card:last-child{border-bottom:0;}
+    .task-extra{display:block;width:auto;text-align:left;margin-top:5px;}
+    .task-icon{display:none;}
+  }
+
+</style>
+</head>
+<body>
+
+<div id="bootOverlay" class="boot-overlay">
+  <div class="boot-box">
+    <div class="boot-title">Kindle Todo Online</div>
+    <div class="boot-text" id="bootText">Carregando informações...</div>
+    <div class="boot-bar" id="bootBar">░░░░░░░░░░</div>
+    <div class="boot-small">Atualizando tarefas, avisos e anexos...</div>
+  </div>
+</div>
+
+<div class="app">
+  <h1>Kindle Todo Online</h1>
+  <div id="status" class="status">Carregando... • DRIVE AUTO SYNC V13 FILE BUTTON</div>
+
+  <div class="top">
+    <div><button onclick="showAdd()">+ Nova</button></div>
+    <div><button onclick="syncNow(true)">Sincronizar</button></div>
+    <div><button onclick="showList()">Lista</button></div>
+    <div><button onclick="showRobot()">Robô</button></div>
+  </div>
+
+  <div id="progressBox" class="box progress-compact">
+    <div class="progress-layout">
+      <div class="progress-left">
+        <div class="progress-title">📊 Resumo geral</div>
+
+        <div class="progress-main">
+          <span>✅ <b id="doneCount">0</b> feitas</span>
+          <span>⏳ <b id="pendingCount">0</b> pendentes</span>
+          <span>🎯 <b id="percentCount">0%</b></span>
+        </div>
+
+        <div id="progressBar" class="progress-bar">░░░░░░░░░░</div>
+
+        <div id="progressResume" class="progress-resume">
+          Total: 0 • 🔴 Alta: 0 • 🟡 Normal: 0 • 🟢 Baixa: 0 • ✅ Concluídas: 0
+        </div>
+      </div>
+
+      <div class="week-summary">
+        <div class="week-title">📈 Resumo da semana</div>
+        <div class="week-line">✅ Concluídas: <b id="weekDone">0</b></div>
+        <div class="week-line">⏳ Pendentes: <b id="weekPending">0</b></div>
+        <div class="week-line">🔴 Atrasadas: <b id="weekLate">0</b></div>
+        <div class="week-link">Ver relatório →</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="attentionBox" class="attention-box hidden"></div>
+
+<div id="addBox" class="box hidden">
+    <div class="section-title">Nova tarefa</div>
+    <div class="row"><input id="newTitle" placeholder="Nome da tarefa..." onkeydown="enterAdd(event)" oninput="markTyping()"></div>
+    <div class="row"><select id="newProject"><option>Geral</option><option>Loja</option><option>Financeiro</option><option>Marketing</option><option>Pessoal</option></select></div>
+    <div class="row"><select id="newPriority"><option value="alta">Prioridade Alta</option><option value="normal" selected>Prioridade Normal</option><option value="baixa">Prioridade Baixa</option></select></div>
+    <button style="width:100%" onclick="addTask()">Adicionar tarefa</button>
+  </div>
+
+  <div id="listPage">
+    <div class="pager-focus">
+      <div class="side"><button onclick="prevPage()">◀</button></div>
+      <div class="middle"><div id="pageTitle" class="page-title-focus">Prioridade Alta</div></div>
+      <div class="side"><button onclick="nextPage()">▶</button></div>
+    </div>
+
+    <div class="focus-counter" id="counter"></div>
+
+    <div class="row"><input id="search" placeholder="Buscar nesta lista..." oninput="renderList()"></div>
+
+    <div class="focus-tabs" id="focusTabs"></div>
+
+    <div id="list"></div>
+
+    <div class="legend">
+      <span>📌 Fixada</span>
+      <span>🔁 Recorrente</span>
+      <span>📅 Tem vencimento</span>
+      <span>⏰ Sonecada</span>
+    </div>
+  </div>
+
+  <div id="robotPage" class="hidden"></div>
+  <div id="progressPage" class="hidden"></div>
+  <div id="detailPage" class="hidden"></div>
+</div>
+
+<script>
+var API_URL = 'https://script.google.com/macros/s/AKfycbwc8t0EwpZF5dxH809Ifaxp56Pe1Fm4ehRIo6WOHEX5c8o30LUrK2xC2R-1HqfG9S68XA/exec';
+
+var KEY='kindle_todo_online_v1';
+var PAGE_KEY='kindle_todo_last_page';
+var pages=['alta','normal','baixa','concluidas'];
+var FOCUS_KEY='kindle_todo_focus_v2';
+var focusMode=localStorage.getItem(FOCUS_KEY)||'hoje';
+var pageIndex=parseInt(localStorage.getItem(PAGE_KEY)||'0',10);
+if(isNaN(pageIndex)||pageIndex<0||pageIndex>3)pageIndex=1;
+var tasks=loadLocal();
+var selected=null;
+var saving=false;
+var lastTyping=0;
+var syncTimer=null;
+var dirty=false;
+var lastSyncedSnapshot='';
+var firstSyncDone=false;
+
+function uid(){return String(new Date().getTime())+String(Math.floor(Math.random()*99999));}
+function now(){return new Date().toISOString();}
+function setStatus(msg){document.getElementById('status').innerHTML=msg;}
+function markTyping(){lastTyping=new Date().getTime();scheduleSync(30000);}
+function loadLocal(){try{var s=localStorage.getItem(KEY);if(s){var a=JSON.parse(s);if(a&&a instanceof Array)return a;}}catch(e){}return [];}
+function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(tasks));markDirty();}catch(e){}}
+function touch(t){t.updatedAt=now();}
+function saveAll(){saveLocal();if(document.getElementById('robotPage').className!=='hidden')renderRobot();else renderList();scheduleSync(30000);}
+function savePage(){localStorage.setItem(PAGE_KEY,String(pageIndex));}
+function showAdd(){var b=document.getElementById('addBox');b.className=b.className.indexOf('hidden')>-1?'box':'box hidden';if(b.className==='box')setTimeout(function(){b.scrollIntoView();},60);}
+function hidePages(){document.getElementById('detailPage').className='hidden';document.getElementById('robotPage').className='hidden';document.getElementById('progressPage').className='hidden';document.getElementById('listPage').className='hidden';}
+function showList(){selected=null;hidePages();document.getElementById('listPage').className='';renderList();}
+function showRobot(){selected=null;hidePages();document.getElementById('robotPage').className='';renderRobot();}
+function showProgress(){selected=null;hidePages();document.getElementById('progressPage').className='';renderProgress();}
+function enterAdd(e){if(e.key==='Enter')addTask();}
+function addTask(){var el=document.getElementById('newTitle');var title=el.value.replace(/^\s+|\s+$/g,'');if(!title)return;var p=document.getElementById('newPriority').value;tasks.unshift({id:uid(),title:title,project:document.getElementById('newProject').value,priority:p,done:false,notes:'',checklist:[],recurrence:'none',nextDate:'',dueDate:'',dueHour:'',fixed:false,snoozeUntil:'',updatedAt:now()});el.value='';document.getElementById('addBox').className='box hidden';pageIndex=pages.indexOf(p);savePage();saveAll();scheduleSync(5000);}
+function prevPage(){pageIndex--;if(pageIndex<0)pageIndex=pages.length-1;savePage();renderList();}
+function nextPage(){pageIndex++;if(pageIndex>=pages.length)pageIndex=0;savePage();renderList();}
+function priorityName(p){if(p==='alta')return 'Prioridade Alta';if(p==='normal')return 'Prioridade Normal';if(p==='baixa')return 'Prioridade Baixa';return 'Concluídas';}
+
+
+
+
+
+function isDoneValue(v){
+  var s = String(v).replace(/^\s+|\s+$/g,'').toLowerCase();
+  return v === true || s === 'true' || s === 'sim' || s === 'feito' || s === 'feita' || s === 'concluido' || s === 'concluído' || s === 'yes' || s === '1';
+}
+
+function getTaskArray(){
+  if(tasks && tasks instanceof Array) return tasks;
+  return [];
+}
+
+function renderProgress(){
+  var arr = getTaskArray();
+
+  var total = arr.length;
+  var done = 0;
+  var pending = 0;
+  var alta = 0;
+  var normal = 0;
+  var baixa = 0;
+
+  for(var i=0;i<arr.length;i++){
+    var t = arr[i] || {};
+    var p = String(t.priority || 'normal').replace(/^\s+|\s+$/g,'').toLowerCase();
+
+    if(isDoneValue(t.done)){
+      done++;
+    }else{
+      pending++;
+      if(p === 'alta') alta++;
+      else if(p === 'baixa') baixa++;
+      else normal++;
+    }
+  }
+
+  var pct = total ? Math.round((done / total) * 100) : 0;
+  var blocks = Math.round(pct / 10);
+  var bar = '';
+
+  for(var j=0;j<10;j++){
+    bar += j < blocks ? '█' : '░';
+  }
+
+  var doneEl = document.getElementById('doneCount');
+  var pendingEl = document.getElementById('pendingCount');
+  var percentEl = document.getElementById('percentCount');
+  var barEl = document.getElementById('progressBar');
+  var resumeEl = document.getElementById('progressResume');
+
+  if(doneEl) doneEl.innerHTML = done;
+  if(pendingEl) pendingEl.innerHTML = pending;
+  if(percentEl) percentEl.innerHTML = pct + '%';
+  if(barEl) barEl.innerHTML = bar;
+  if(resumeEl){
+    resumeEl.innerHTML = 'Total: '+total+
+      ' • 🔴 Alta: '+alta+
+      ' • 🟡 Normal: '+normal+
+      ' • 🟢 Baixa: '+baixa+
+      ' • ✅ Concluídas: '+done;
+  }
+  renderWeekSummary();
+}
+
+
+function startOfDay(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate());}
+function pad2(n){return ('0'+n).slice(-2);}
+function isoDate(d){return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());}
+function brDate(d){return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear();}
+function parseTaskDate(v){
+  if(!v)return null;
+  var s=String(v).replace(/^\s+|\s+$/g,'');
+  if(!s)return null;
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)){
+    var p=s.split('-');
+    var d=new Date(Number(p[0]),Number(p[1])-1,Number(p[2].slice(0,2)));
+    if(!isNaN(d.getTime()))return d;
+  }
+  if(/^\d{2}\/\d{2}\/\d{4}/.test(s)){
+    var a=s.split(/[\/\s:]/);
+    var d2=new Date(Number(a[2]),Number(a[1])-1,Number(a[0]));
+    if(!isNaN(d2.getTime()))return d2;
+  }
+  return null;
+}
+function taskDueDate(t){
+  return parseTaskDate(t.dueDate||t.dueAt||t.deadline||t.vencimento||t.nextDate||'');
+}
+function daysDiff(d){
+  return Math.floor((startOfDay(d).getTime()-startOfDay(new Date()).getTime())/86400000);
+}
+function isDoneTask(t){return isDoneValue(t.done);}
+function focusLabel(){
+  if(focusMode==='hoje')return 'Hoje';
+  if(focusMode==='amanha')return 'Amanhã';
+  if(focusMode==='semana')return 'Esta semana';
+  if(focusMode==='atrasadas')return 'Atrasadas';
+  return 'Hoje';
+}
+function isSnoozed(t){var d=parseTaskDate(t.snoozeUntil||'');if(!d)return false;return daysDiff(d)>0;}
+function taskInFocus(t){
+  if(isDoneTask(t))return false;
+  if(isSnoozed(t))return false;
+  var d=taskDueDate(t);
+  if(!d){
+    // Sem data aparece em Hoje para não ficar esquecida.
+    return focusMode==='hoje';
+  }
+  var diff=daysDiff(d);
+  if(focusMode==='hoje')return diff<=0;
+  if(focusMode==='amanha')return diff===1;
+  if(focusMode==='semana')return diff>=0&&diff<=7;
+  if(focusMode==='atrasadas')return diff<0;
+  return true;
+}
+function countFocus(mode){
+  var old=focusMode, c=0;
+  focusMode=mode;
+  for(var i=0;i<tasks.length;i++)if(taskInFocus(tasks[i]))c++;
+  focusMode=old;
+  return c;
+}
+function setFocus(mode){
+  focusMode=mode;
+  localStorage.setItem(FOCUS_KEY,mode);
+  renderList();
+}
+function renderFocusTabs(){
+  var late=countFocus('atrasadas');
+  var el=document.getElementById('focusTabs');
+  if(!el)return;
+  var html='';
+  function b(mode,label,count,extra){
+    html+='<div><button class="'+(focusMode===mode?'active-focus ':'')+(extra||'')+'" onclick="setFocus(\''+mode+'\')">'+label+(count!==null?' ('+count+')':'')+'</button></div>';
+  }
+  b('hoje','📅 Hoje',countFocus('hoje'),'');
+  b('amanha','Amanhã',countFocus('amanha'),'');
+  b('semana','Esta semana',countFocus('semana'),'');
+  if(late>0)b('atrasadas','⚠️ Atrasadas',late,'late-focus');
+  el.innerHTML=html;
+}
+function dueText(t){
+  var d=taskDueDate(t);
+  if(!d)return '';
+  var diff=daysDiff(d);
+  var txt='📅 Vence: '+brDate(d);
+  if(diff<0)txt+=' • atrasada há '+Math.abs(diff)+' dia(s)';
+  else if(diff===0)txt+=' • vence hoje';
+  else if(diff===1)txt+=' • vence amanhã';
+  else txt+=' • faltam '+diff+' dias';
+  return '<div class="due-line '+(diff<0?'late-text':'')+'">'+txt+'</div>';
+}
+function taskIcon(t){
+  var s=(String(t.title||'')+' '+String(t.project||'')+' '+String(t.notes||'')).toLowerCase();
+  if(s.indexOf('camera')>-1||s.indexOf('câmera')>-1)return '📷';
+  if(s.indexOf('nf')>-1||s.indexOf('nota')>-1)return '📄';
+  if(s.indexOf('pix')>-1||s.indexOf('cartão')>-1||s.indexOf('cartao')>-1)return '💳';
+  if(s.indexOf('estoque')>-1)return '📦';
+  if(s.indexOf('caixa')>-1)return '🧾';
+  return '📝';
+}
+function recurrenceLabel(t){
+  if(!t.recurrence||t.recurrence==='none')return '';
+  if(t.recurrence==='daily')return '🔁 diária';
+  if(t.recurrence==='weekly')return '🔁 semanal';
+  if(t.recurrence==='monthly')return '🔁 mensal';
+  return '🔁 recorrente';
+}
+function renderAttention(){
+  var arr=[];
+  for(var i=0;i<tasks.length;i++){
+    var t=tasks[i];
+    if(isDoneTask(t))continue;
+    var d=taskDueDate(t);
+    if(!d)continue;
+    var diff=daysDiff(d);
+    if(diff<=7)arr.push(t);
+  }
+  arr.sort(function(a,b){
+    var da=taskDueDate(a), db=taskDueDate(b);
+    return da.getTime()-db.getTime();
+  });
+  var box=document.getElementById('attentionBox');
+  if(!box)return;
+  if(!arr.length){box.className='attention-box hidden';box.innerHTML='';return;}
+  var show=arr.slice(0,3);
+  var modo=0;for(var k=0;k<arr.length;k++){var dk=taskDueDate(arr[k]);if(dk&&daysDiff(dk)<0){modo=1;break;}}var h='<div class="attention-top"><div>⚠️ Atenção</div><div class="right" onclick="openAttentionList('+(modo?"'atrasadas'":"'semana'")+')">Ver todas ('+arr.length+') →</div></div><div class="attention-grid">';
+  for(var j=0;j<show.length;j++){
+    var t=show[j], d=taskDueDate(t), diff=daysDiff(d);
+    var cls=diff<=2?'attention-red':(diff<=5?'attention-orange':'attention-green');
+    var label=diff<0?'Atrasada há '+Math.abs(diff)+' dia(s)':(diff===0?'Vence hoje':'Vence em '+diff+' dias');
+    h+='<div class="attention-card" onclick="openTask(\''+t.id+'\')"><div class="attention-title">📅 '+esc(t.title)+'</div><div>'+label+'</div><div class="attention-date '+cls+'">'+brDate(d)+'</div></div>';
+  }
+  h+='</div>';
+  box.className='attention-box';
+  box.innerHTML=h;
+}
+function renderWeekSummary(){
+  var done=0, pend=0, late=0;
+  for(var i=0;i<tasks.length;i++){
+    var t=tasks[i];
+    var d=taskDueDate(t);
+    var inWeek=true;
+    if(d){var diff=daysDiff(d);inWeek=(diff>=-7&&diff<=7);}
+    if(!inWeek)continue;
+    if(isDoneTask(t))done++;
+    else{
+      pend++;
+      if(d&&daysDiff(d)<0)late++;
+    }
+  }
+  var a=document.getElementById('weekDone'),b=document.getElementById('weekPending'),c=document.getElementById('weekLate');
+  if(a)a.innerHTML=done;
+  if(b)b.innerHTML=pend;
+  if(c)c.innerHTML=late;
+}
+function openAttentionList(mode){focusMode=mode||'semana';localStorage.setItem(FOCUS_KEY,focusMode);showList();setTimeout(function(){var el=document.getElementById('focusTabs');if(el)el.scrollIntoView();},80);}
+function closeSmartPopup(){var p=document.getElementById('smartPopup');if(p)p.style.display='none';}
+function maybeShowSmartPopup(){
+  var todayKey='kindle_popup_count_'+isoDate(new Date());
+  var lastKey='kindle_popup_last_'+isoDate(new Date());
+  var count=parseInt(localStorage.getItem(todayKey)||'0',10);
+  var last=parseInt(localStorage.getItem(lastKey)||'0',10);
+  var nowMs=new Date().getTime();
+
+  // No máximo 3 vezes ao dia. Depois da primeira, só repete após 2 horas.
+  if(count>=3)return;
+  if(count>0 && (nowMs-last)<7200000)return;
+
+  var important=[];
+  for(var i=0;i<tasks.length;i++){
+    var t=tasks[i];
+    if(isDoneTask(t))continue;
+    if(isSnoozed(t))continue;
+    var d=taskDueDate(t);
+    if(!d)continue;
+    var diff=daysDiff(d);
+    if(diff<=7 || t.priority==='alta')important.push(t);
+  }
+
+  if(!important.length)return;
+
+  important.sort(function(a,b){return smartScore(b)-smartScore(a);});
+
+  var h='<div>Você possui '+important.length+' tarefa(s) que precisam de atenção.</div>';
+  for(var j=0;j<Math.min(3,important.length);j++){
+    var x=important[j], dx=taskDueDate(x), df=dx?daysDiff(dx):0;
+    h+='<div class="popup-item" onclick="closeSmartPopup();openTask(\''+x.id+'\')"><b>'+esc(x.title)+'</b><br>'+esc(x.project||'')+' • '+(dx?brDate(dx):'sem data')+' • '+(df<0?'atrasada':df===0?'vence hoje':'faltam '+df+' dias')+'</div>';
+  }
+
+  var p=document.getElementById('smartPopup'), pc=document.getElementById('popupContent');
+  if(pc)pc.innerHTML=h;
+  if(p)p.style.display='block';
+
+  localStorage.setItem(todayKey,String(count+1));
+  localStorage.setItem(lastKey,String(nowMs));
+}
+
+function renderHeader(){var p=pages[pageIndex];document.getElementById('pageTitle').innerHTML=priorityName(p);var total=0;for(var i=0;i<tasks.length;i++){if(p==='concluidas'){if(tasks[i].done)total++;}else{if(!tasks[i].done&&tasks[i].priority===p)total++;}}document.getElementById('counter').innerHTML=(pageIndex+1)+' de '+pages.length+' • '+total+' tarefas';}
+
+
+
+function renderList(){renderProgress();renderAttention();renderHeader();if(document.getElementById('listPage').className==='hidden')return;var p=pages[pageIndex];var q=(document.getElementById('search')?document.getElementById('search').value:'').toLowerCase();var html='';var ordered=tasks.slice().sort(function(a,b){return smartScore(b)-smartScore(a)||String(b.updatedAt||'').localeCompare(String(a.updatedAt||''));});for(var i=0;i<ordered.length;i++){var t=ordered[i];if(p==='concluidas'){if(!t.done)continue;}else{if(t.done)continue;if(t.priority!==p)continue;}var text=(t.title+' '+t.project+' '+t.notes).toLowerCase();if(q&&text.indexOf(q)===-1)continue;html+=taskHtml(t);}document.getElementById('list').innerHTML=html||'<div class="empty">Nenhuma tarefa aqui.</div>';}
+function taskHtml(t){var done=0;for(var i=0;i<t.checklist.length;i++)if(t.checklist[i].done)done++;var mark=t.done?'✓':'';var fn=t.done?'restoreTask':'finishTask';return '<div class="task" id="task-'+t.id+'"><div class="ck"><div class="check" onclick="'+fn+'(\''+t.id+'\')">'+mark+'</div></div><div class="body" onclick="openTask(\''+t.id+'\')"><div class="title">'+esc(t.title)+'</div><div class="meta"><span class="badge">'+esc(t.project)+'</span><span class="badge">'+priorityName(t.priority).replace('Prioridade ','')+'</span>'+done+'/'+t.checklist.length+(t.recurrence&&t.recurrence!=='none'?' • '+recurrenceName(t.recurrence):'')+'</div></div></div>';}
+function finishTask(id){var el=document.getElementById('task-'+id);if(el)el.className='task fade';setTimeout(function(){completeTask(id);saveLocal();renderProgress();renderList();scheduleSync(5000);},250);}
+function completeTask(id){for(var i=0;i<tasks.length;i++){if(tasks[i].id===id){var t=tasks[i];t.done=true;touch(t);createNextRecurring(t);break;}}}
+function createNextRecurring(t){if(!t.recurrence||t.recurrence==='none')return;var d=new Date();if(t.recurrence==='daily')d.setDate(d.getDate()+1);if(t.recurrence==='weekly')d.setDate(d.getDate()+7);if(t.recurrence==='monthly')d.setMonth(d.getMonth()+1);var clean=[];for(var i=0;i<(t.checklist||[]).length;i++){clean.push({id:uid(),text:t.checklist[i].text||'',done:false});}
+tasks.unshift({id:uid(),title:t.title,project:t.project,priority:t.priority,done:false,notes:t.notes||'',checklist:clean,recurrence:t.recurrence,nextDate:d.toISOString().slice(0,10),updatedAt:now()});}
+function restoreTask(id){for(var i=0;i<tasks.length;i++){if(tasks[i].id===id){tasks[i].done=false;touch(tasks[i]);pageIndex=pages.indexOf(tasks[i].priority);savePage();break;}}saveLocal();renderProgress();renderList();scheduleSync(5000);}
+function get(id){for(var i=0;i<tasks.length;i++)if(tasks[i].id===id)return tasks[i];return null;}
+function openTask(id){selected=id;var t=get(id);if(!t)return;hidePages();document.getElementById('detailPage').className='';renderDetail();}
+function renderDetail(){renderProgress();var t=get(selected);if(!t){showList();return;}var h='<div class="box"><button onclick="showList()" style="width:49%">← Voltar</button> <button onclick="finishFromDetail(\''+t.id+'\')" style="width:49%">Concluir</button><div class="section-title">Tarefa</div><input class="detail-title" value="'+attr(t.title)+'" oninput="upd(\'title\',this.value);markTyping()"><div class="row"><select onchange="upd(\'project\',this.value)">'+opt('Geral',t.project)+opt('Loja',t.project)+opt('Financeiro',t.project)+opt('Marketing',t.project)+opt('Pessoal',t.project)+'</select></div><div class="row"><select onchange="updPriority(this.value)">'+optP('alta',t.priority,'Prioridade Alta')+optP('normal',t.priority,'Prioridade Normal')+optP('baixa',t.priority,'Prioridade Baixa')+'</select></div><div class="compact-panel"><div class="compact-title">⏱ Prazo e recorrência</div><div class="compact-grid"><div class="compact-cell small"><div class="compact-label">Data</div><input type="date" value="'+attr(t.dueDate||t.nextDate||'')+'" onchange="upd(\'dueDate\',this.value);markTyping()"></div><div class="compact-cell small"><div class="compact-label">Hora</div><input type="time" value="'+attr(t.dueHour||'')+'" onchange="upd(\'dueHour\',this.value);markTyping()"></div><div class="compact-cell medium"><div class="compact-label">Repetir</div><select onchange="upd(\'recurrence\',this.value);renderDetail()">'+optR('none',t.recurrence,'Não repetir')+optR('daily',t.recurrence,'Todo dia')+optR('weekly',t.recurrence,'Toda semana')+optR('monthly',t.recurrence,'Todo mês')+'</select></div><div class="compact-cell small"><div class="compact-label">Fixar</div><select onchange="updFixed(this.value)">'+optR('false',String(!!t.fixed),'Não')+optR('true',String(!!t.fixed),'📌 Sim')+'</select></div></div><div class="compact-actions"><div><button onclick="snoozeTask(1)">Soneca 1d</button></div><div><button onclick="snoozeTask(3)">3d</button></div><div><button onclick="snoozeTask(7)">7d</button></div></div><div class="compact-hint">Se for recorrente, ao concluir o sistema cria a próxima automaticamente.</div></div><div class="section-title">Anotações internas</div><div class="rich-desc-wrap"><div class="rich-toolbar"><div><button onclick="focusRichEditor()">Colar print</button></div><div><label for="richFileInput">+ Imagem/Arquivo</label></div><div><button onclick="clearRichDescription()">Limpar</button></div></div><div id="richEditor" class="rich-editor" contenteditable="true" data-placeholder="Detalhes da tarefa... Cole prints aqui com Ctrl+V." oninput="saveRichDescription()" onpaste="handleRichPaste(event)" ondrop="handleRichDrop(event)" ondragover="event.preventDefault()">'+richContent(t.notes)+'</div><div class="rich-hint">Escreva texto e cole prints direto aqui, igual descrição do Asana. Arquivos entram como link/ícone.</div></div><div class="section-title">Checklist interno</div>';
+for(var i=0;i<t.checklist.length;i++){var it=t.checklist[i];h+='<div class="mini"><div class="mini-c"><div class="check" onclick="toggleItem(\''+it.id+'\')">'+(it.done?'✓':'')+'</div></div><div class="mini-i"><input value="'+attr(it.text)+'" oninput="updateItem(\''+it.id+'\',this.value);markTyping()"></div><div class="mini-x"><button onclick="delItem(\''+it.id+'\')">×</button></div></div>';}
+h+='<button onclick="addItem()" style="width:100%;margin-top:8px">+ Item</button><button class="danger" onclick="deleteTask()" style="width:100%;margin-top:10px">Apagar tarefa</button></div>';document.getElementById('detailPage').innerHTML=h;}
+
+function richContent(s){
+  s=String(s||'');
+  if(s.indexOf('<')>-1 && (s.indexOf('<img')>-1 || s.indexOf('<a')>-1 || s.indexOf('<div')>-1 || s.indexOf('<br')>-1 || s.indexOf('<p')>-1)){
+    return s;
+  }
+  return esc(s).replace(/\n/g,'<br>');
+}
+function focusRichEditor(){
+  var ed=document.getElementById('richEditor');
+  if(ed){ed.focus();setStatus('Agora use Ctrl+V para colar o print na descrição.');}
+}
+function saveRichDescription(){
+  var t=get(selected);
+  var ed=document.getElementById('richEditor');
+  if(!t||!ed)return;
+  t.notes=ed.innerHTML;
+  touch(t);
+  saveLocal();
+  scheduleTypingSync(); // texto: sincroniza 5s depois que parar de digitar
+}
+function clearRichDescription(){
+  if(!confirm('Limpar a descrição?'))return;
+  var ed=document.getElementById('richEditor');
+  var t=get(selected);
+  if(ed)ed.innerHTML='';
+  if(t){t.notes='';touch(t);saveLocal();scheduleSync(10000);}
+}
+function handleRichPaste(e){
+  var items=(e.clipboardData||window.clipboardData).items||[];
+  var handled=false;
+  for(var i=0;i<items.length;i++){
+    var it=items[i];
+    if(it.kind==='file'){
+      var f=it.getAsFile();
+      if(f){
+        insertRichFile(f);
+        handled=true;
+      }
+    }
+  }
+  if(handled){
+    e.preventDefault();
+    setStatus('Print colado na descrição.');
+  }
+}
+function handleRichFiles(files){
+  if(!files||!files.length)return;
+  for(var i=0;i<files.length;i++)insertRichFile(files[i]);
+  var inp=document.getElementById('richFileInput');
+  if(inp)inp.value='';
+}
+function handleRichDrop(e){
+  e.preventDefault();
+  if(e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files.length){
+    handleRichFiles(e.dataTransfer.files);
+  }
+}
+function insertHtmlAtCursor(html){
+  var sel, range;
+  var ed=document.getElementById('richEditor');
+  if(!ed)return;
+  ed.focus();
+  if(window.getSelection){
+    sel=window.getSelection();
+    if(sel.getRangeAt&&sel.rangeCount){
+      range=sel.getRangeAt(0);
+      range.deleteContents();
+      var el=document.createElement('div');
+      el.innerHTML=html;
+      var frag=document.createDocumentFragment(), node, lastNode;
+      while((node=el.firstChild)){
+        lastNode=frag.appendChild(node);
+      }
+      range.insertNode(frag);
+      if(lastNode){
+        range=range.cloneRange();
+        range.setStartAfter(lastNode);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    }else{
+      ed.innerHTML+=html;
+    }
+  }else{
+    ed.innerHTML+=html;
+  }
+  saveRichDescription();
+}
+function fileIcon(type,name){
+  type=String(type||'').toLowerCase();
+  name=String(name||'').toLowerCase();
+  if(type.indexOf('image/')===0)return '🖼️';
+  if(type.indexOf('pdf')>-1||name.indexOf('.pdf')>-1)return '📄';
+  if(name.indexOf('.xls')>-1||name.indexOf('.xlsx')>-1||name.indexOf('.csv')>-1)return '📊';
+  if(name.indexOf('.doc')>-1||name.indexOf('.docx')>-1)return '📝';
+  return '📎';
+}
+
+function forceSyncAfterUpload(){
+  // USAR SOMENTE depois de colar imagem ou anexar arquivo.
+  // Texto digitado usa scheduleTypingSync(), com espera de 5 segundos.
+  setStatus('Imagem/arquivo salvo. Sincronizando agora...');
+  try{clearTimeout(syncTimer);}catch(e){}
+  markDirty();
+  lastTyping=0;
+
+  var tentativas=0;
+
+  function tentar(){
+    tentativas++;
+
+    if(saving){
+      if(tentativas<60){
+        setTimeout(tentar,300);
+      }else{
+        setStatus('Sincronização ocupada. Vou tentar novamente em alguns segundos...');
+        scheduleSync(3000);
+      }
+      return;
+    }
+
+    initialRefreshSync();
+  }
+
+  setTimeout(tentar,150);
+}
+
+
+
+
+function initialRefreshSync(){
+  bootStart();
+
+  setStatus('Atualizando dados iniciais...');
+
+  // Carrega interface imediatamente
+  try{
+    render();
+  }catch(e){console.log(e);}
+
+  // Sync em segundo plano
+  setTimeout(function(){
+    try{
+      syncNow(true);
+    }catch(e){
+      console.log(e);
+    }
+  },300);
+
+  setTimeout(function(){
+    try{
+      maybeShowSmartPopup();
+    }catch(e){}
+  },2500);
+}
+
+
+function bootSet(pct,msg){
+  var blocks=Math.round(pct/10);
+  var bar='';
+  for(var i=0;i<10;i++)bar+=i<blocks?'█':'░';
+  var b=document.getElementById('bootBar');
+  var t=document.getElementById('bootText');
+  if(b)b.innerHTML=bar;
+  if(t)t.innerHTML=msg||'Carregando informações...';
+}
+function bootHide(){
+  var o=document.getElementById('bootOverlay');
+  if(!o)return;
+  o.style.opacity='0';
+  setTimeout(function(){
+    o.style.display='none';
+  },450);
+}
+function bootStart(){
+  bootSet(15,'Abrindo sistema...');
+  setTimeout(function(){bootSet(45,'Carregando tarefas...');},250);
+  setTimeout(function(){bootSet(75,'Atualizando informações...');},700);
+  setTimeout(function(){bootSet(100,'Concluído.');},1200);
+
+  // SOME SEMPRE
+  setTimeout(function(){
+    bootHide();
+  },1800);
+}
+
+
+window.addEventListener('DOMContentLoaded',function(){
+  setTimeout(function(){
+    try{bootHide();}catch(e){}
+  },2200);
+});
+
+function tasksSnapshot(){
+  try{return JSON.stringify(tasks);}catch(e){return String(new Date().getTime());}
+}
+function markDirty(){dirty=true;}
+function hasChanges(){return dirty || tasksSnapshot()!==lastSyncedSnapshot;}
+function markSynced(){dirty=false;lastSyncedSnapshot=tasksSnapshot();}
+function autoSyncIfChanged(){
+  if(saving)return;
+  if(hasChanges()){
+    setStatus('Alteração detectada. Sincronizando...');
+    syncNow(true);
+  }
+}
+
+function scheduleTypingSync(){
+  clearTimeout(syncTimer);
+  lastTyping=new Date().getTime();
+  markDirty();
+  setStatus('Salvo localmente. Vou sincronizar após parar de digitar...');
+  syncTimer=setTimeout(function(){
+    if(!hasChanges()){
+      setStatus('Sem alterações novas para sincronizar.');
+      return;
+    }
+    if(saving){
+      scheduleSync(3000);
+      return;
+    }
+    syncNow(true);
+  },5000);
+}
+
+function uploadFileToDrive(file,dataUrl){
+  setStatus('Enviando imagem/arquivo para o Google Drive... aguarde.');
+
+  return fetch(API_URL,{
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({
+      action:'uploadFile',
+      name:file.name||('print_'+new Date().getTime()+'.png'),
+      mimeType:file.type||'application/octet-stream',
+      data:dataUrl
+    })
+  })
+  .then(function(r){
+    return r.text();
+  })
+  .then(function(txt){
+    var data;
+    try{
+      data=JSON.parse(txt);
+    }catch(e){
+      throw new Error('Resposta do servidor não veio em JSON: '+txt.slice(0,120));
+    }
+
+    if(!data || !data.ok || !data.file){
+      throw new Error((data&&data.message)?data.message:'Falha ao enviar arquivo para o Drive.');
+    }
+
+    return data.file;
+  });
+}
+
+function insertRichFile(file){
+  if(!file)return;
+
+  var reader=new FileReader();
+
+  reader.onload=function(ev){
+    var dataUrl=ev.target.result;
+    var safeName=esc(file.name||('print_'+new Date().getTime()+'.png'));
+    var type=file.type||'application/octet-stream';
+
+    setStatus('Preparando upload...');
+
+    uploadFileToDrive(file,dataUrl)
+      .then(function(uploaded){
+        var name=esc(uploaded.name||safeName);
+        var viewUrl=uploaded.viewUrl||uploaded.directUrl||uploaded.downloadUrl||'';
+        var directUrl=uploaded.directUrl||uploaded.viewUrl||uploaded.downloadUrl||'';
+
+        if(String(type).indexOf('image/')===0){
+          insertHtmlAtCursor(
+            '<div><img src="'+directUrl+'" data-drive-id="'+esc(uploaded.id||'')+'" alt="'+name+'" onclick="openImageViewer(this.src, this.alt)"></div><div><br></div>'
+          );
+        }else{
+          insertHtmlAtCursor(
+            '<div><a href="'+viewUrl+'" target="_blank" data-drive-id="'+esc(uploaded.id||'')+'">'+fileIcon(type,name)+' '+name+'</a></div><div><br></div>'
+          );
+        }
+
+        saveRichDescription();
+        setStatus('Arquivo salvo no Drive. Sincronizando agora...');
+        forceSyncAfterUpload();
+      })
+      .catch(function(err){
+        // Só entra aqui se realmente falhar.
+        console.log('Falha real no upload Drive:', err);
+
+        if(String(type).indexOf('image/')===0){
+          insertHtmlAtCursor(
+            '<div><img src="'+dataUrl+'" alt="'+safeName+'" onclick="openImageViewer(this.src, this.alt)" data-local="true"></div><div><br></div>'
+          );
+        }else{
+          insertHtmlAtCursor(
+            '<div><a href="'+dataUrl+'" target="_blank" data-local="true">'+fileIcon(type,safeName)+' '+safeName+'</a></div><div><br></div>'
+          );
+        }
+
+        saveRichDescription();
+        setStatus('Drive falhou: '+(err&&err.message?err.message:err)+'. Salvei localmente e vou sincronizar agora.');
+        forceSyncAfterUpload();
+      });
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function abrirDriveLink(url){
+  if(!url)return;
+  window.open(url,'_blank','noopener');
+}
+function stopAndOpenDrive(e,url){
+  if(e){
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  abrirDriveLink(url);
+  return false;
+}
+
+function openImageViewer(src,title){
+  var img=document.getElementById('imageViewerImg');
+  var box=document.getElementById('imageViewer');
+  var tt=document.getElementById('imageViewerTitle');
+  if(img)img.src=src;
+  if(tt)tt.innerHTML=esc(title||'Imagem');
+  if(box)box.style.display='block';
+}
+function closeImageViewer(){
+  var box=document.getElementById('imageViewer');
+  var img=document.getElementById('imageViewerImg');
+  if(img)img.src='';
+  if(box)box.style.display='none';
+}
+
+function upd(field,val){var t=get(selected);if(!t)return;t[field]=val;touch(t);saveLocal();scheduleSync(30000);}
+function updFixed(val){var t=get(selected);if(!t)return;t.fixed=(val==='true');touch(t);saveLocal();scheduleSync(30000);renderDetail();}
+function snoozeTask(days){var t=get(selected);if(!t)return;var d=new Date();d.setDate(d.getDate()+days);t.snoozeUntil=isoDate(d);touch(t);saveLocal();scheduleSync(30000);renderDetail();}
+function updPriority(val){var t=get(selected);if(!t)return;t.priority=val;pageIndex=pages.indexOf(val);savePage();touch(t);saveLocal();scheduleSync(30000);}
+function finishFromDetail(id){completeTask(id);saveLocal();renderProgress();scheduleSync(5000);showList();}
+function addItem(){var t=get(selected);if(!t)return;t.checklist.push({id:uid(),text:'',done:false});touch(t);saveLocal();scheduleSync(30000);renderDetail();}
+function toggleItem(iid){var t=get(selected);for(var i=0;i<t.checklist.length;i++)if(t.checklist[i].id===iid)t.checklist[i].done=!t.checklist[i].done;touch(t);saveLocal();scheduleSync(10000);renderDetail();}
+function updateItem(iid,val){var t=get(selected);for(var i=0;i<t.checklist.length;i++)if(t.checklist[i].id===iid)t.checklist[i].text=val;touch(t);saveLocal();scheduleSync(30000);}
+function delItem(iid){var t=get(selected);var n=[];for(var i=0;i<t.checklist.length;i++)if(t.checklist[i].id!==iid)n.push(t.checklist[i]);t.checklist=n;touch(t);saveLocal();scheduleSync(10000);renderDetail();}
+function deleteTask(){if(!confirm('Apagar?'))return;var t=get(selected);if(t){t.done=true;touch(t);}saveLocal();renderProgress();scheduleSync(5000);showList();}
+function scheduleSync(delay){clearTimeout(syncTimer);syncTimer=setTimeout(function(){syncNow(false);},delay||30000);setStatus('Salvo localmente. Sincronização aguardando...');}
+function syncNow(manual){if(saving)return;if(firstSyncDone&&!hasChanges()){setStatus('Sem alterações novas para sincronizar.');return;}var diff=new Date().getTime()-lastTyping;if(!manual&&diff<25000){scheduleSync(30000);return;}saving=true;setStatus('Sincronizando...');var wasDetail=document.getElementById('detailPage').className!=='hidden';var oldSelected=selected;fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'sync',tasks:tasks})}).then(function(r){return r.json();}).then(function(data){if(data&&data.ok&&data.tasks&&data.tasks instanceof Array){if(data.tasks.length>0||tasks.length===0){tasks=mergeTasks(tasks,data.tasks);saveLocal();}renderProgress();if(wasDetail&&oldSelected&&get(oldSelected)){selected=oldSelected;renderDetail();}else if(document.getElementById('robotPage').className!=='hidden'){renderRobot();}else if(document.getElementById('progressPage').className!=='hidden'){renderProgressPage();}else{renderList();}renderProgress();renderAttention();setTimeout(function(){maybeShowSmartPopup();},500);markSynced();firstSyncDone=true;setStatus('Sincronizado com Google Sheets.');}else{setStatus('Resposta inválida do servidor.');}saving=false;}).catch(function(e){setStatus('Falha ao sincronizar. Dados ficaram salvos localmente.');saving=false;});}
+function mergeTasks(local,remote){var map={};var i,t;for(i=0;i<local.length;i++){t=local[i];map[t.id]=t;}for(i=0;i<remote.length;i++){t=remote[i];if(!map[t.id])map[t.id]=t;else{var a=String(map[t.id].updatedAt||'');var b=String(t.updatedAt||'');if(b>a)map[t.id]=t;}}var arr=[];for(var id in map)arr.push(map[id]);arr.sort(function(a,b){return String(b.updatedAt||'').localeCompare(String(a.updatedAt||''));});return arr;}
+function opt(v,c){return '<option '+(v===c?'selected':'')+'>'+v+'</option>';}
+function optP(v,c,label){return '<option value="'+v+'" '+(v===c?'selected':'')+'>'+label+'</option>';}
+
+function recurrenceName(r){if(r==='daily')return 'diária';if(r==='weekly')return 'semanal';if(r==='monthly')return 'mensal';return 'sem repetição';}
+function optR(v,c,label){return '<option value="'+v+'" '+(v===(c||'none')?'selected':'')+'>'+label+'</option>';}
+function daysOld(t){var d=new Date(String(t.updatedAt||now()));var n=new Date();var ms=n.getTime()-d.getTime();return Math.max(0,Math.floor(ms/86400000));}
+function smartScore(t){if(t.done)return -9999;var s=0;if(t.priority==='alta')s+=60;if(t.priority==='normal')s+=35;if(t.priority==='baixa')s+=10;s+=Math.min(30,daysOld(t)*5);var tx=(String(t.title||'')+' '+String(t.notes||'')).toLowerCase();var words=['urgente','camera','câmera','nf','nota','devolver','devolução','ajustar','boleto','pagar','venda','pix'];for(var i=0;i<words.length;i++){if(tx.indexOf(words[i])>-1)s+=8;}if(t.checklist&&t.checklist.length){var done=0;for(var j=0;j<t.checklist.length;j++)if(t.checklist[j].done)done++;if(done<t.checklist.length)s+=5;}if(t.recurrence&&t.recurrence!=='none')s+=4;return s;}
+function robotReason(t){var r=[];if(t.priority==='alta')r.push('prioridade alta');if(daysOld(t)>=2)r.push('parada há '+daysOld(t)+' dias');var tx=(String(t.title||'')+' '+String(t.notes||'')).toLowerCase();if(tx.indexOf('urgente')>-1)r.push('tem palavra urgente');if(tx.indexOf('nf')>-1||tx.indexOf('nota')>-1)r.push('envolve nota/NF');if(tx.indexOf('camera')>-1||tx.indexOf('câmera')>-1)r.push('envolve câmera');if(t.recurrence&&t.recurrence!=='none')r.push('recorrente '+recurrenceName(t.recurrence));return r.length?r.join(' • '):'ordem sugerida pelo robô';}
+function renderRobot(){var arr=[];for(var i=0;i<tasks.length;i++)if(!tasks[i].done)arr.push(tasks[i]);arr.sort(function(a,b){return smartScore(b)-smartScore(a)||String(b.updatedAt||'').localeCompare(String(a.updatedAt||''));});var h='<div class="box"><button onclick="showList()" style="width:100%">← Voltar para lista</button><div class="section-title">Robô: Fazer primeiro</div><div class="hint">Ele junta todas as tarefas pendentes e mostra o que merece atenção primeiro.</div>';if(!arr.length){h+='<div class="empty">Nenhuma tarefa pendente.</div>';}for(var i=0;i<arr.length;i++){var t=arr[i];h+='<div class="robotCard" onclick="openTask(\''+t.id+'\')"><div class="title">'+(i+1)+'. '+esc(t.title)+'</div><div class="meta"><span class="badge">'+esc(t.project)+'</span><span class="badge">'+priorityName(t.priority).replace('Prioridade ','')+'</span></div><div class="robotScore">Pontuação: '+smartScore(t)+' • '+esc(robotReason(t))+'</div></div>';}h+='</div>';document.getElementById('robotPage').innerHTML=h;}
+function bar(pct){var filled=Math.round(pct/10);var out='';for(var i=0;i<10;i++)out+=i<filled?'█':'░';return out;}
+function renderProgressPage(){var total=tasks.length, done=0, pend=0, alta=0, normal=0, baixa=0;for(var i=0;i<tasks.length;i++){if(tasks[i].done)done++;else{pend++;if(tasks[i].priority==='alta')alta++;if(tasks[i].priority==='normal')normal++;if(tasks[i].priority==='baixa')baixa++;}}var pct=total?Math.round(done*100/total):0;var h='<div class="box"><button onclick="showList()" style="width:100%">← Voltar para lista</button><div class="section-title">Progresso geral</div><div class="progressBox"><div class="bigNum">'+pct+'%</div><div class="bar">'+bar(pct)+'</div><div>✅ '+done+' feitas &nbsp; ⏳ '+pend+' pendentes</div></div><div class="section-title">Resumo simples</div><div class="task"><div class="body"><div class="title">Total: '+total+'</div><div class="meta">Alta pendente: '+alta+' • Normal pendente: '+normal+' • Baixa pendente: '+baixa+'</div></div></div><div class="hint">Esse painel é leve para Kindle: texto + barrinha simples, sem gráfico pesado.</div></div>';document.getElementById('progressPage').innerHTML=h;}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#039;');}
+function attr(s){return esc(s).replace(/`/g,'&#096;');}
+
+document.addEventListener('click',function(e){
+  var el=e.target;
+  while(el && el!==document){
+    if(el.tagName==='A' && el.href){
+      e.preventDefault();
+      e.stopPropagation();
+      window.open(el.href,'_blank','noopener');
+      return false;
+    }
+    if(el.className && String(el.className).indexOf('drive-file-button')>-1){
+      return true;
+    }
+    el=el.parentNode;
+  }
+});
+
+renderProgress();
+renderList();
+syncNow(true);
+setTimeout(function(){renderAttention();maybeShowSmartPopup();},2500);
+setInterval(function(){maybeShowSmartPopup();},1800000);
+setInterval(function(){autoSyncIfChanged();},40000);
+</script>
+
+<div id="smartPopup" class="popup-overlay">
+  <div class="popup-box">
+    <div style="text-align:right"><button class="smallBtn" onclick="closeSmartPopup()">×</button></div>
+    <div class="popup-title">⚠️ Atenção!</div>
+    <div id="popupContent"></div>
+    <div class="popup-actions">
+      <div><button onclick="closeSmartPopup()">Depois</button></div>
+      <div><button onclick="closeSmartPopup();showList()">Ver tarefas</button></div>
+    </div>
+  </div>
+</div>
+
+
+<input id="richFileInput" type="file" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv" style="display:none" onchange="handleRichFiles(this.files)">
+<div id="imageViewer" class="image-viewer">
+  <div class="image-viewer-box">
+    <div id="imageViewerTitle" style="font-weight:bold;margin-bottom:8px;">Imagem</div>
+    <img id="imageViewerImg" src="">
+    <button onclick="closeImageViewer()">Fechar</button>
+  </div>
+</div>
+
+</body>
+</html>
